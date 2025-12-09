@@ -1,0 +1,27 @@
+# GPU Dockerfile (CUDA 12.1 runtime) - requires host with NVIDIA drivers and nvidia-docker2
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+# System deps
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    wget \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Install CUDA-compatible PyTorch (adjust cu121 tag if needed)
+RUN pip install --no-cache-dir torch==2.0.1+cu121 torchvision==0.15.2+cu121 torchaudio==2.0.2+cu121 \
+    -f https://download.pytorch.org/whl/cu121/torch_stable.html
+
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY . /app
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

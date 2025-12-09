@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  cognitive-biofoundry:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cognitive-biofoundry:latest
+    ports:
+      - '8501:8501'
+    volumes:
+      - ./models:/app/models
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+    restart: unless-stopped
